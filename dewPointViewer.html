@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
 
 <script language="javascript">
-const uriTempOut = "http://localhost:81/piSim/?d=TO";
-const uriTempIn  = "http://localhost:81/piSim/?d=TI";
-const uriHumOut  = "http://localhost:81/piSim/?d=HO";
-const uriHumIn   = "http://localhost:81/piSim/?d=HI";
+const uriTempOut = "shellySim.php?d=TO";
+const uriTempIn  = "shellySim.php?d=TI";
+const uriHumOut  = "shellySim.php?d=HO";
+const uriHumIn   = "shellySim.php?d=HI";
 
 window.addEventListener('load', function(e) {
 	timerHandler();	
@@ -40,7 +40,7 @@ function timerHandler() {
 }
 
 function resetVariables() {
-	console.log("reset Variables;  xhrTempOut=" + xhrTempOut + ";    xhrTempIn=" + xhrTempIn + ";    xhrHumOut=" + xhrHumOut + ";    xhrHumIn=" + xhrHumIn);
+	//console.log("reset Variables;  xhrTempOut=" + xhrTempOut + ";    xhrTempIn=" + xhrTempIn + ";    xhrHumOut=" + xhrHumOut + ";    xhrHumIn=" + xhrHumIn);
 	tempOut = -1000;
 	tempIn = -1000;
 	humOut = -1000;
@@ -77,11 +77,11 @@ function resetVariables() {
 
 function doAsyncCalls() {
 	resetVariables();
-	console.log("A reset Variables;  xhrTempOut=" + xhrTempOut + ";    xhrTempIn=" + xhrTempIn + ";    xhrHumOut=" + xhrHumOut + ";    xhrHumIn=" + xhrHumIn);
 	
 	xhrTempOut = callDataAsyncFromAPI(uriTempOut, 
 		function(xmlHttpRequest) { 
-			tempOut = Number(xmlHttpRequest.response);
+			let json = JSON.parse(xmlHttpRequest.response);
+			tempOut = json["tC"];
 			xhrTempOut = null;
 			checkIfAllFinished();
 		},
@@ -94,11 +94,10 @@ function doAsyncCalls() {
 		}
 	);
 	
-	console.log("B reset Variables;  xhrTempOut=" + xhrTempOut + ";    xhrTempIn=" + xhrTempIn + ";    xhrHumOut=" + xhrHumOut + ";    xhrHumIn=" + xhrHumIn);
-	
 	xhrTempIn = callDataAsyncFromAPI(uriTempIn,  
 		function(xmlHttpRequest) { 
-			tempIn = Number(xmlHttpRequest.response);
+			let json = JSON.parse(xmlHttpRequest.response);
+			tempIn = json["tC"];
 			xhrTempIn = null;
 			checkIfAllFinished();
 		},
@@ -111,11 +110,10 @@ function doAsyncCalls() {
 		}
 	);
 	
-	console.log("C reset Variables;  xhrTempOut=" + xhrTempOut + ";    xhrTempIn=" + xhrTempIn + ";    xhrHumOut=" + xhrHumOut + ";    xhrHumIn=" + xhrHumIn);
-	
 	xhrHumOut = callDataAsyncFromAPI(uriHumOut,  
 		function(xmlHttpRequest) { 
-			humOut = Number(xmlHttpRequest.response);
+			let json = JSON.parse(xmlHttpRequest.response);
+			humOut = json["rh"];
 			xhrHumOut = null;
 			checkIfAllFinished();
 		},
@@ -128,11 +126,10 @@ function doAsyncCalls() {
 		}
 	);
 	
-	console.log("D reset Variables;  xhrTempOut=" + xhrTempOut + ";    xhrTempIn=" + xhrTempIn + ";    xhrHumOut=" + xhrHumOut + ";    xhrHumIn=" + xhrHumIn);
-	
 	xhrHumOut = callDataAsyncFromAPI(uriHumIn,   
 		function(xmlHttpRequest) { 
-			humIn = Number(xmlHttpRequest.response);
+			let json = JSON.parse(xmlHttpRequest.response);
+			humIn = json["rh"];
 			xhrHumIn = null;
 			checkIfAllFinished();
 		},
@@ -145,11 +142,10 @@ function doAsyncCalls() {
 		}
 	);
 	
-	console.log("E reset Variables;  xhrTempOut=" + xhrTempOut + ";    xhrTempIn=" + xhrTempIn + ";    xhrHumOut=" + xhrHumOut + ";    xhrHumIn=" + xhrHumIn);
 }
 
 function checkIfAllFinished() {
-	console.log("tempOut=" + tempOut + ";  " + "tempIn=" + tempIn + ";  " + "humOut=" + humOut + ";  " + "humIn=" + humIn + ";  ");
+	//console.log("tempOut=" + tempOut + ";  " + "tempIn=" + tempIn + ";  " + "humOut=" + humOut + ";  " + "humIn=" + humIn + ";  ");
 	if (tempOut < -400 || tempIn < -400 || humOut < -400 || humIn < -400) {
 		return;
 	}
@@ -168,7 +164,6 @@ function notOk() {
 }
 
 function okNotOk(ok) {
-	console.log("okNotOk(" + ok + ")");
 	document.getElementById("stateDivOK").style.display = ok ? "flex" : "none";
 	document.getElementById("stateDivFail").style.display = ok ? "none" : "flex";
 }
@@ -204,10 +199,6 @@ function callDataAsyncFromAPI(url, callBackSuccess, callBackError) {
 	xhr.send();
 	
 	return xhr;
-}
-
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
 }
 
 function doCalc() {
