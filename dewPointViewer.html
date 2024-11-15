@@ -5,10 +5,15 @@
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
 
 <script language="javascript">
-const uriTempOut = "http://192.168.33.1/rpc/Temperature.GetStatus?id=100";
-const uriTempIn  = "http://192.168.33.2/rpc/Temperature.GetStatus?id=100";
-const uriHumOut  = "http://192.168.33.1/rpc/Humidity.GetStatus?id=100";
-const uriHumIn   = "http://192.168.33.2/rpc/Humidity.GetStatus?id=100";
+//const uriTempOut = "http://192.168.33.1/rpc/Temperature.GetStatus?id=100";
+//const uriTempIn  = "http://192.168.33.2/rpc/Temperature.GetStatus?id=100";
+//const uriHumOut  = "http://192.168.33.1/rpc/Humidity.GetStatus?id=100";
+//const uriHumIn   = "http://192.168.33.2/rpc/Humidity.GetStatus?id=100";
+
+const uriTempOut = "shellySim.php?d=TO";
+const uriTempIn  = "shellySim.php?d=TI";
+const uriHumOut  = "shellySim.php?d=HO";
+const uriHumIn   = "shellySim.php?d=HI";
 
 window.addEventListener('load', function(e) {
 	timerHandler();	
@@ -20,11 +25,6 @@ var tempOut = -1000;
 var tempIn = -1000;
 var humOut = -1000;
 var humIn = -1000;
-
-var xhrTempOut = null;
-var xhrTempIn  = null;
-var xhrHumOut  = null;
-var xhrHumIn   = null;
 
 function timerHandler() {
 	doAsyncCalls();
@@ -40,104 +40,63 @@ function timerHandler() {
 }
 
 function resetVariables() {
-	//console.log("reset Variables;  xhrTempOut=" + xhrTempOut + ";    xhrTempIn=" + xhrTempIn + ";    xhrHumOut=" + xhrHumOut + ";    xhrHumIn=" + xhrHumIn);
 	tempOut = -1000;
 	tempIn = -1000;
 	humOut = -1000;
 	humIn = -1000;
-	
-	if (xhrTempOut != null) { 
-		console.log("cleanup xhrTempOut");
-		xhrTempOut.abort();
-		xhrTempOut = null;
-		notOk();
-	}
-	
-	if (xhrTempIn != null) { 
-		console.log("cleanup xhrTempIn");
-		xhrTempIn.abort();
-		xhrTempIn = null;
-		notOk();
-	}
-	
-	if (xhrHumOut != null) { 
-		console.log("cleanup xhrHumOut");
-		xhrHumOut.abort();
-		xhrHumOut = null;
-		notOk();
-	}
-	
-    if (xhrHumIn != null) { 
-		console.log("cleanup xhrHumIn");
-		xhrHumIn.abort();
-		xhrHumIn = null;
-		notOk();
-	}
 }	
 
 function doAsyncCalls() {
 	resetVariables();
 	
-	xhrTempOut = callDataAsyncFromAPI(uriTempOut, 
-		function(xmlHttpRequest) { 
-			let json = JSON.parse(xmlHttpRequest.response);
+	callDataAsyncFromAPI(uriTempOut, 
+		function(json) { 
 			tempOut = json["tC"];
-			xhrTempOut = null;
 			checkIfAllFinished();
 		},
 		function() {
 			console.log("Error Temp Out");
 			notOk();
 			tempOut = -500;
-			xhrTempOut = null;
 			checkIfAllFinished();
 		}
 	);
 	
-	xhrTempIn = callDataAsyncFromAPI(uriTempIn,  
-		function(xmlHttpRequest) { 
-			let json = JSON.parse(xmlHttpRequest.response);
+	callDataAsyncFromAPI(uriTempIn,  
+		function(json) { 
 			tempIn = json["tC"];
-			xhrTempIn = null;
 			checkIfAllFinished();
 		},
 		function() {
 			console.log("Error Temp In");
 			notOk();
 			tempIn = -500;
-			xhrTempIn = null;
 			checkIfAllFinished();
 		}
 	);
 	
-	xhrHumOut = callDataAsyncFromAPI(uriHumOut,  
-		function(xmlHttpRequest) { 
-			let json = JSON.parse(xmlHttpRequest.response);
+	callDataAsyncFromAPI(uriHumOut,  
+		function(json) { 
 			humOut = json["rh"];
-			xhrHumOut = null;
 			checkIfAllFinished();
 		},
 		function() {
 			console.log("Error Hum Out");
 			notOk();
 			humOut = -500;
-			xhrHumOut = null;
 			checkIfAllFinished();
 		}
 	);
 	
-	xhrHumOut = callDataAsyncFromAPI(uriHumIn,   
-		function(xmlHttpRequest) { 
-			let json = JSON.parse(xmlHttpRequest.response);
+	callDataAsyncFromAPI(uriHumIn,   
+		function(json) { 
 			humIn = json["rh"];
-			xhrHumIn = null;
 			checkIfAllFinished();
 		},
 		function() {
 			console.log("Error Hum In");
 			notOk();
 			humIn = -500;
-			xhrHumIn = null;
 			checkIfAllFinished();
 		}
 	);
@@ -171,34 +130,14 @@ function okNotOk(ok) {
 function callDataAsyncFromAPI(url, callBackSuccess, callBackError) {
 	let method = 'GET';
 
-	// Prepare network magic to call API later
-	let xhr = new XMLHttpRequest();
-	if ("withCredentials" in xhr) {
-		// Most browsers.
-		xhr.open(method, url, true);
-	} else if (typeof XDomainRequest != "undefined") {
-		// IE8 & IE9
-		xhr = new XDomainRequest();
-		xhr.open(method, url);
-	} else {
-		xhr = null; 
-		alert("Sorry not supported by Browser");
-		return;
-	}
-
-	xhr.onload = function() { // success ;-)
-		callBackSuccess(this);
-	};
-
-	xhr.onerror = function() { // Fail :-(
+	fetch(url).then(response => { return response.json(); })
+	.then(response => {
+       callBackSuccess(response);
+	})
+	.catch(err => {
 	  callBackError();
-	  console.log("Error");
-	};
-
-	// Do the call to the API
-	xhr.send();
-	
-	return xhr;
+	  console.log(err);
+	});
 }
 
 function doCalc() {
