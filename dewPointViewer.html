@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
 
 <script language="javascript">
-//const uriTempOut = "http://192.168.33.1/rpc/Temperature.GetStatus?id=100";
-//const uriTempIn  = "http://192.168.33.2/rpc/Temperature.GetStatus?id=100";
-//const uriHumOut  = "http://192.168.33.1/rpc/Humidity.GetStatus?id=100";
-//const uriHumIn   = "http://192.168.33.2/rpc/Humidity.GetStatus?id=100";
+const uriTempOut = "http://192.168.33.1/rpc/Temperature.GetStatus?id=100";
+const uriTempIn  = "http://192.168.33.2/rpc/Temperature.GetStatus?id=100";
+const uriHumOut  = "http://192.168.33.1/rpc/Humidity.GetStatus?id=100";
+const uriHumIn   = "http://192.168.33.2/rpc/Humidity.GetStatus?id=100";
 
-const uriTempOut = "shellySim.php?d=TO";
-const uriTempIn  = "shellySim.php?d=TI";
-const uriHumOut  = "shellySim.php?d=HO";
-const uriHumIn   = "shellySim.php?d=HI";
+//const prefix = window.location.href.substr(0, window.location.href.lastIndexOf("/") + 1);
+//const uriTempOut = prefix + "shellySim.php?d=TO";
+//const uriTempIn  = prefix + "shellySim.php?d=TI";
+//const uriHumOut  = prefix + "shellySim.php?d=HO";
+//const uriHumIn   = prefix + "shellySim.php?d=HI";
 
 window.addEventListener('load', function(e) {
 	timerHandler();	
@@ -36,7 +37,7 @@ function timerHandler() {
 		document.getElementById("changeDiv").innerHTML = "|";
 	}
 	
-	setTimeout(timerHandler, 2000);
+	setTimeout(timerHandler, 4000);
 }
 
 function resetVariables() {
@@ -130,7 +131,7 @@ function okNotOk(ok) {
 function callDataAsyncFromAPI(url, callBackSuccess, callBackError) {
 	let method = 'GET';
 
-	fetch(url).then(response => { return response.json(); })
+	fetch("downloader.php?url=" + encodeURI(url)).then(response => { return response.json(); })
 	.then(response => {
        callBackSuccess(response);
 	})
